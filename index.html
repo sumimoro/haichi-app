@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>配置表</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1a4f72;--blue-l:#d6eaf8;
+  --green:#1e8449;--green-l:#eafaf1;
+  --orange:#d35400;
+  --border:#ccc;--bg:#ecf0f3;--card:#fff;--sub:#666;--red:#c0392b;
+}
+body{font-family:-apple-system,'Hiragino Sans',sans-serif;background:var(--bg);color:#333;font-size:14px;}
+button{cursor:pointer;font-family:inherit;}
+textarea,input,select{font-family:inherit;font-size:inherit;}
+
+/* ===== HEADER ===== */
+.hdr{background:var(--blue);color:#fff;padding:8px 14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.hdr-title{font-size:.95rem;font-weight:700;}
+.date-nav{display:flex;align-items:center;gap:4px;}
+.nav-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:#fff;padding:4px 9px;border-radius:5px;font-size:.83rem;}
+.nav-btn:hover{background:rgba(255,255,255,.25);}
+.date-label{font-size:.92rem;font-weight:700;min-width:126px;text-align:center;
+  cursor:pointer;background:rgba(255,255,255,.1);border-radius:5px;padding:3px 8px;}
+.tpl-badge{font-size:.72rem;background:rgba(255,255,255,.15);border-radius:10px;padding:2px 7px;}
+.hdr-right{margin-left:auto;display:flex;gap:5px;flex-shrink:0;}
+.btn-h{padding:5px 11px;border-radius:6px;border:none;font-size:.82rem;font-weight:700;}
+.btn-auto{background:var(--orange);color:#fff;}
+.btn-load{background:#8e44ad;color:#fff;}
+.btn-print{background:var(--green);color:#fff;}
+.btn-set{background:rgba(255,255,255,.2);color:#fff;}
+
+/* ===== VIEW TABS ===== */
+.view-tabs{background:var(--blue);display:flex;gap:0;padding:0 14px;
+  border-top:1px solid rgba(255,255,255,.15);}
+.vtab{padding:7px 18px;font-size:.88rem;font-weight:700;border:none;
+  background:none;color:rgba(255,255,255,.6);
+  border-bottom:3px solid transparent;cursor:pointer;}
+.vtab.act{color:#fff;border-bottom-color:#fff;}
+
+/* ===== CONTENT ===== */
+.content{padding:10px 12px;max-width:1200px;margin:0 auto;}
+.panel{background:var(--card);border-radius:10px;padding:12px 14px;
+  margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.sec-lbl{font-size:.7rem;font-weight:700;color:var(--sub);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;}
+
+/* ===== SHIFT PANEL ===== */
+.shift-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;}
+.shift-row{display:flex;align-items:center;gap:5px;}
+.s-lbl{font-size:.8rem;font-weight:700;min-width:68px;color:#444;}
+.s-inp{flex:1;padding:4px 6px;border:1.5px solid var(--border);border-radius:5px;font-size:.8rem;}
+.s-inp:focus{outline:none;border-color:var(--blue);}
+
+/* ===== ASSIGNMENT TABLE ===== */
+.table-wrap{overflow-x:auto;}
+.main-table{border-collapse:collapse;width:100%;font-size:.87rem;}
+.main-table th,.main-table td{border:1px solid var(--border);vertical-align:top;}
+.main-table th{background:var(--blue);color:#fff;padding:5px 8px;text-align:center;font-size:.8rem;}
+.th-date{font-size:.9rem;font-weight:700;text-align:left;padding-left:10px;}
+.time-td{background:#dce6f0;font-weight:700;text-align:center;font-size:.8rem;
+  padding:6px 7px;white-space:nowrap;vertical-align:middle;}
+.role-td{background:#f2f4f6;font-size:.8rem;font-weight:600;
+  padding:5px 7px;white-space:pre-wrap;min-width:84px;}
+.staff-td{padding:5px 7px;min-width:140px;cursor:pointer;}
+.staff-td:hover{background:#eaf4fd;}
+.staff-display{font-size:.84rem;line-height:1.6;min-height:24px;white-space:pre-wrap;}
+.staff-td.empty .staff-display::after{content:'クリックして入力…';color:#ccc;font-size:.73rem;}
+.auto-filled{background:#fffbe6;}
+.right-td{background:#fffdf0;padding:6px 7px;min-width:180px;vertical-align:top;}
+.haichi-line{display:flex;align-items:center;gap:3px;margin-bottom:5px;}
+.haichi-lbl{font-size:.78rem;font-weight:700;}
+.haichi-inp{border:1px solid #ddd;border-radius:4px;padding:2px 5px;font-size:.8rem;width:105px;}
+.haichi-inp:focus{outline:none;border-color:var(--blue);}
+.event-line{display:flex;gap:3px;margin-bottom:2px;}
+.event-inp{flex:1;border:1px solid #ddd;border-radius:4px;padding:2px 5px;
+  font-size:.76rem;line-height:1.5;resize:none;overflow:hidden;}
+.event-inp:focus{outline:none;border-color:var(--blue);}
+.event-del{background:none;border:none;color:var(--red);font-size:.85rem;padding:2px;}
+.add-event-btn{border:1.5px dashed #ccc;background:none;border-radius:5px;
+  padding:2px 7px;font-size:.73rem;color:var(--sub);width:100%;margin-top:2px;text-align:left;}
+.add-event-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ===== BOTTOM ===== */
+.bottom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:3px 10px;}
+.bottom-row{display:flex;gap:5px;font-size:.83rem;padding:2px 0;}
+.b-lbl{font-weight:700;min-width:60px;}
+.gyoji-line{margin-top:6px;display:flex;align-items:center;gap:6px;font-size:.83rem;}
+.gyoji-lbl{font-weight:700;}
+.gyoji-inp{flex:1;border:1.5px solid var(--border);border-radius:5px;padding:3px 7px;font-size:.83rem;}
+.gyoji-inp:focus{outline:none;border-color:var(--blue);}
+
+/* ===== CELL DIALOG ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:500;display:none;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.dialog{background:#fff;border-radius:14px;padding:18px;
+  width:530px;max-width:95vw;max-height:88vh;overflow-y:auto;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.dlg-title{font-size:.93rem;font-weight:700;margin-bottom:4px;
+  padding-bottom:6px;border-bottom:1px solid #eee;}
+.dlg-note{font-size:.73rem;color:var(--sub);margin-bottom:8px;padding-top:3px;}
+.dlg-slbl{font-size:.7rem;font-weight:700;color:var(--sub);
+  text-transform:uppercase;letter-spacing:.07em;margin:8px 0 5px;}
+.chip-grid{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;max-height:190px;overflow-y:auto;}
+.staff-chip{padding:4px 10px;border-radius:18px;font-size:.78rem;font-weight:600;
+  border:1.5px solid;cursor:pointer;display:flex;align-items:center;gap:3px;}
+.chip-avail{border-color:var(--green);background:var(--green-l);color:var(--green);}
+.chip-sel{border-color:var(--blue);background:var(--blue-l);color:var(--blue);}
+.chip-off{border-color:#e0e0e0;background:#f9f9f9;color:#bbb;}
+.chip-meta{font-size:.66rem;opacity:.7;}
+.dlg-ta{width:100%;padding:6px 8px;border:1.5px solid var(--border);
+  border-radius:7px;font-size:.87rem;line-height:1.6;resize:vertical;min-height:50px;}
+.dlg-ta:focus{outline:none;border-color:var(--blue);}
+.dlg-acts{display:flex;gap:7px;justify-content:flex-end;margin-top:10px;}
+.dlg-ok{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 20px;font-weight:700;}
+.dlg-cancel{background:#f0f0f0;color:#333;border:none;border-radius:7px;padding:7px 14px;}
+
+/* ===== CONFIRM ===== */
+.cbox{background:#fff;border-radius:14px;padding:22px;
+  width:380px;max-width:94vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.cbox-title{font-size:.95rem;font-weight:700;margin-bottom:7px;}
+.cbox-body{font-size:.85rem;color:var(--sub);margin-bottom:16px;line-height:1.6;}
+.cbox-acts{display:flex;gap:8px;justify-content:center;}
+.cok{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:8px 22px;font-weight:700;}
+.ccancel{background:#f0f0f0;color:#333;border:none;border-radius:7px;padding:8px 16px;}
+
+/* ===== SETTINGS ===== */
+.sett-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:600;display:none;align-items:flex-start;
+  justify-content:center;padding:16px 10px;overflow-y:auto;}
+.sett-overlay.show{display:flex;}
+.sett-box{background:#fff;border-radius:14px;width:820px;max-width:98vw;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.sett-hdr{padding:14px 18px 0;border-bottom:1px solid #eee;}
+.sett-tabs{display:flex;gap:0;}
+.stab{padding:7px 14px;font-size:.83rem;font-weight:600;border:none;
+  background:none;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;}
+.stab.act{color:var(--blue);border-bottom-color:var(--blue);}
+.sett-body{padding:14px 18px;max-height:68vh;overflow-y:auto;}
+.ssec{margin-bottom:18px;}
+.ss-lbl{font-size:.7rem;font-weight:700;color:var(--sub);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+.staff-tbl{width:100%;border-collapse:collapse;font-size:.8rem;}
+.staff-tbl th{background:#f5f7fa;padding:5px 7px;text-align:left;
+  border:1px solid #e4e4e4;font-size:.73rem;color:var(--sub);}
+.staff-tbl td{padding:4px 5px;border:1px solid #ebebeb;vertical-align:middle;}
+.staff-tbl tr:hover td{background:#fafcff;}
+.ti{width:100%;border:1px solid #ddd;border-radius:4px;padding:3px 5px;font-size:.8rem;}
+.ti:focus{outline:none;border-color:var(--blue);}
+.ts{width:100%;border:1px solid #ddd;border-radius:4px;padding:2px 4px;font-size:.8rem;background:#fff;}
+.tdel{background:#ffebee;color:#c62828;border:none;border-radius:4px;
+  padding:2px 7px;font-size:.73rem;}
+.add-row{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;align-items:center;}
+.ai{padding:5px 9px;border:1.5px solid var(--border);border-radius:5px;font-size:.85rem;}
+.ai:focus{outline:none;border-color:var(--blue);}
+.abtn{background:var(--blue);color:#fff;border:none;border-radius:5px;
+  padding:5px 12px;font-weight:600;font-size:.85rem;}
+.stime-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.stime-tbl th{background:#f5f7fa;padding:5px 9px;border:1px solid #e4e4e4;
+  text-align:left;font-size:.75rem;color:var(--sub);}
+.stime-tbl td{padding:4px 7px;border:1px solid #ebebeb;}
+.tinp{width:75px;border:1px solid #ddd;border-radius:4px;
+  padding:3px 5px;font-size:.8rem;text-align:center;}
+.tinp:focus{outline:none;border-color:var(--blue);}
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tpl-area{width:100%;padding:6px 8px;border:1.5px solid var(--border);
+  border-radius:6px;font-size:.8rem;line-height:1.7;resize:vertical;min-height:76px;}
+.tpl-area:focus{outline:none;border-color:var(--blue);}
+.sett-foot{padding:10px 18px;border-top:1px solid #eee;display:flex;gap:7px;justify-content:flex-end;}
+.ssave{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 18px;font-weight:700;}
+.sclose{background:#f0f0f0;color:#333;border:none;border-radius:7px;padding:7px 14px;}
+
+/* ===== KINMU (MONTHLY SCHEDULE) ===== */
+.kinmu-content{padding:10px 12px;}
+.kinmu-nav{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.kinmu-month-lbl{font-size:1rem;font-weight:700;min-width:100px;text-align:center;}
+.kinmu-grid-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.kinmu-tbl{border-collapse:collapse;font-size:.78rem;background:#fff;}
+.kinmu-tbl th,.kinmu-tbl td{border:1px solid #ddd;padding:0;}
+.kinmu-tbl th{background:var(--blue);color:#fff;padding:4px 5px;
+  text-align:center;font-size:.72rem;white-space:nowrap;}
+.kth-sun{background:#c0392b;}
+.kth-sat{background:#2471a3;}
+.kth-today{background:#27ae60!important;}
+.name-col{position:sticky;left:0;z-index:2;background:#f5f7fa!important;
+  padding:4px 8px!important;font-size:.8rem;font-weight:600;
+  white-space:nowrap;min-width:80px;border-right:2px solid #ccc!important;}
+.kname-hdr{position:sticky;left:0;z-index:3;background:var(--blue)!important;
+  min-width:80px;border-right:2px solid rgba(255,255,255,.3)!important;}
+.kcell{width:32px;height:28px;text-align:center;cursor:pointer;
+  font-size:.75rem;font-weight:700;vertical-align:middle;padding:2px 1px;
+  transition:opacity .1s;}
+.kcell:hover{opacity:.75;}
+/* Shift colors */
+.kc-haya{background:#e3f2fd;color:#1565c0;}
+.kc-oso{background:#fff3e0;color:#e65100;}
+.kc-yoru{background:#283593;color:#fff;}
+.kc-tou{background:#1a237e;color:#fff;}
+.kc-nichi{background:#e8f5e9;color:#2e7d32;}
+.kc-kyu{background:#f5f5f5;color:#aaa;}
+.kc-1{background:#f3e5f5;color:#6a1b9a;}
+.kc-2a{background:#fce4ec;color:#880e4f;}
+.kc-2b{background:#fff8e1;color:#f57f17;}
+.kc-3{background:#e0f7fa;color:#006064;}
+.kc-4{background:#f1f8e9;color:#33691e;}
+.kc-empty{background:#fff;color:#bbb;}
+
+/* Code popup */
+.code-popup{position:fixed;background:#fff;border-radius:10px;
+  padding:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:700;
+  display:none;min-width:180px;}
+.code-popup.show{display:block;}
+.popup-title{font-size:.72rem;color:var(--sub);margin-bottom:7px;font-weight:700;}
+.code-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;}
+.code-btn{padding:4px 2px;border:1.5px solid var(--border);border-radius:5px;
+  font-size:.78rem;font-weight:700;text-align:center;cursor:pointer;transition:.1s;}
+.code-btn:hover{opacity:.75;}
+.cb-clear{background:#ffebee;color:#c62828;border-color:#c62828;}
+.popup-close{width:100%;border:none;background:#f5f5f5;border-radius:5px;
+  padding:4px;font-size:.78rem;color:var(--sub);margin-top:4px;cursor:pointer;}
+
+/* Load indicator */
+.load-notice{background:#fffbe6;border:1.5px solid #f0ad00;border-radius:8px;
+  padding:8px 12px;font-size:.82rem;display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;}
+.load-notice button{padding:3px 9px;border:none;border-radius:5px;
+  background:var(--blue);color:#fff;font-size:.75rem;cursor:pointer;}
+
+/* ===== PRINT ===== */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{background:#fff;font-size:9pt;}
+  .hdr,.view-tabs,.shift-panel,.sec-lbl,.add-event-btn,
+  .event-del,.overlay,.sett-overlay,.view-kinmu,.load-notice{display:none!important;}
+  .content{padding:3mm;max-width:none;}
+  .panel{box-shadow:none;border-radius:0;border:none;padding:0;}
+  .bottom-section{margin-top:4px!important;}
+  .bottom-grid{grid-template-columns:repeat(3,1fr);}
+  .main-table th,.main-table td{border:1px solid #000;padding:2px 4px;}
+  .main-table th{background:#dde!important;color:#000;}
+  .time-td{background:#e8e8e8!important;}
+  .role-td{background:#f5f5f5!important;}
+  .right-td{background:#fffef2!important;}
+  .auto-filled{background:transparent!important;}
+  .event-inp,.haichi-inp,.gyoji-inp{border:none;background:transparent;padding:0;}
+  .table-wrap{overflow:visible;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="hdr no-print">
+    <span class="hdr-title">📋 配置表</span>
+    <div class="date-nav" id="hdrDateNav">
+      <button class="nav-btn" onclick="changeDate(-1)">◀ 前日</button>
+      <div class="date-label" id="dateLabel" onclick="pickDate()">日付</div>
+      <button class="nav-btn" onclick="changeDate(1)">翌日 ▶</button>
+    </div>
+    <span class="tpl-badge" id="tplBadge"></span>
+    <div class="hdr-right">
+      <button class="btn-h btn-load" id="btnLoadKinmu" onclick="loadFromKinmu()" title="月の勤務表からシフトを読み込む">📅 勤務表から読込</button>
+      <button class="btn-h btn-auto" onclick="openAutoConfirm()">🤖 自動配置</button>
+      <button class="btn-h btn-print" onclick="window.print()">🖨 印刷</button>
+      <button class="btn-h btn-set" onclick="openSettings()">⚙ 設定</button>
+    </div>
+  </div>
+
+  <!-- VIEW TABS -->
+  <div class="view-tabs no-print">
+    <button class="vtab act" id="vtab-haichi" onclick="switchView('haichi')">📋 配置表</button>
+    <button class="vtab" id="vtab-kinmu" onclick="switchView('kinmu')">📅 勤務表（月）</button>
+  </div>
+
+  <!-- VIEW: 配置表 -->
+  <div id="view-haichi">
+    <div class="content">
+      <div id="loadNotice" style="display:none" class="load-notice no-print">
+        📅 勤務表からシフトを読み込みました。「🤖 自動配置」で配置を生成できます。
+        <button onclick="document.getElementById('loadNotice').style.display='none'">閉じる</button>
+      </div>
+      <!-- SHIFT PANEL -->
+      <div class="panel shift-panel">
+        <div class="sec-lbl">シフト勤務者（当日）　※「📅 勤務表から読込」で自動入力できます</div>
+        <div class="shift-grid" id="shiftGrid"></div>
+      </div>
+      <!-- MAIN TABLE -->
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <div class="table-wrap"><table class="main-table" id="mainTable"></table></div>
+      </div>
+      <!-- BOTTOM -->
+      <div class="panel bottom-section">
+        <div class="sec-lbl no-print">シフトサマリー（印刷に含まれます）</div>
+        <div class="bottom-grid" id="bottomGrid"></div>
+        <div class="gyoji-line">
+          <span class="gyoji-lbl">勤務表行事：</span>
+          <input class="gyoji-inp" id="gyojiInp" placeholder="例：音楽活動"
+            oninput="dayData.gyoji=this.value;autosave()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: 勤務表 -->
+  <div id="view-kinmu" style="display:none">
+    <div class="kinmu-content">
+      <div class="panel">
+        <div class="kinmu-nav">
+          <button class="nav-btn" style="background:var(--blue);color:#fff" onclick="changeKinmuMonth(-1)">◀ 前月</button>
+          <span class="kinmu-month-lbl" id="kinmuMonthLbl"></span>
+          <button class="nav-btn" style="background:var(--blue);color:#fff" onclick="changeKinmuMonth(1)">翌月 ▶</button>
+          <span style="font-size:.8rem;color:var(--sub);margin-left:8px">
+            ※ セルをクリックしてシフト記号を入力。入力後は「📋 配置表」→「📅 勤務表から読込」でシフトを自動反映。
+          </span>
+        </div>
+        <div class="kinmu-grid-wrap">
+          <table class="kinmu-tbl" id="kinmuTbl"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<input type="date" id="hiddenDate" style="position:fixed;opacity:0;pointer-events:none;top:40px"
+  onchange="onDatePick(this.value)">
+
+<!-- CELL DIALOG -->
+<div class="overlay" id="cellOverlay" onclick="if(event.target===this)closeDlg()">
+  <div class="dialog">
+    <div class="dlg-title" id="dlgTitle"></div>
+    <div class="dlg-note" id="dlgNote"></div>
+    <div class="dlg-slbl">出勤中のスタッフ（この時間帯に勤務中 = 太枠 / 勤務外 = グレー）</div>
+    <div class="chip-grid" id="dlgChips"></div>
+    <div class="dlg-slbl">担当者（自由入力）</div>
+    <textarea class="dlg-ta" id="dlgTa" rows="3" placeholder="例：山科、青木、上内"></textarea>
+    <div class="dlg-acts">
+      <button class="dlg-cancel" onclick="closeDlg()">キャンセル</button>
+      <button class="dlg-ok" onclick="saveDlg()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO CONFIRM -->
+<div class="overlay" id="autoOverlay" onclick="if(event.target===this)closeAutoConfirm()">
+  <div class="cbox">
+    <div class="cbox-title">🤖 自動配置</div>
+    <div class="cbox-body">シフトと職員属性をもとに各セルへ自動割当します。<br>
+      <label style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:8px;cursor:pointer;">
+        <input type="checkbox" id="autoOverwrite"> 入力済みセルも上書きする
+      </label>
+    </div>
+    <div class="cbox-acts">
+      <button class="ccancel" onclick="closeAutoConfirm()">キャンセル</button>
+      <button class="cok" onclick="runAutoPlace()">実行</button>
+    </div>
+  </div>
+</div>
+
+<!-- CODE POPUP (kinmu grid) -->
+<div class="code-popup" id="codePopup">
+  <div class="popup-title" id="popupTitle">シフト記号を選択</div>
+  <div class="code-grid" id="codeGrid"></div>
+  <button class="popup-close" onclick="closePopup()">閉じる</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="sett-overlay" id="settOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="sett-box">
+    <div class="sett-hdr">
+      <div style="font-size:.95rem;font-weight:700;margin-bottom:10px">⚙ 設定</div>
+      <div class="sett-tabs">
+        <button class="stab act" onclick="switchStab('staff',this)">👥 職員マスタ</button>
+        <button class="stab" onclick="switchStab('shifts',this)">🕐 シフト時間</button>
+        <button class="stab" onclick="switchStab('codes',this)">🔤 シフト記号</button>
+        <button class="stab" onclick="switchStab('tpl',this)">📋 テンプレート</button>
+      </div>
+    </div>
+
+    <div class="sett-body" id="stab-staff">
+      <div class="ssec">
+        <div class="ss-lbl">職員一覧</div>
+        <div style="overflow-x:auto">
+          <table class="staff-tbl"><thead><tr>
+            <th style="min-width:78px">氏名</th><th>性別</th>
+            <th>所属棟<br><span style="font-weight:400;font-size:.66rem">週末AM用</span></th>
+            <th>班番号<br><span style="font-weight:400;font-size:.66rem">平日AM用</span></th>
+            <th style="min-width:110px">スキル・タグ</th><th></th>
+          </tr></thead><tbody id="staffTblBody"></tbody></table>
+        </div>
+        <div class="add-row">
+          <input class="ai" id="nName" placeholder="氏名" style="width:85px" onkeydown="if(event.key==='Enter')addStaff()">
+          <select class="ai" id="nGender" style="width:72px">
+            <option value="">性別</option><option value="男">男性</option><option value="女">女性</option>
+          </select>
+          <select class="ai" id="nTou" style="width:95px"><option value="">所属棟なし</option></select>
+          <select class="ai" id="nBan" style="width:72px">
+            <option value="">班なし</option>
+            <option value="1">1</option><option value="2A">2A</option>
+            <option value="2B">2B</option><option value="3">3</option><option value="4">4</option>
+          </select>
+          <input class="ai" id="nTags" placeholder="タグ（任意）" style="width:110px">
+          <button class="abtn" onclick="addStaff()">＋ 追加</button>
+        </div>
+      </div>
+      <div style="font-size:.76rem;color:var(--sub);line-height:1.6">
+        ※ 所属棟：週末AM（す・た、ひ など）に対応 ／ 班番号：平日AM（1班、2A班 など）に対応<br>
+        ※ スキル・タグ：入浴担当、リーダーなど自由入力
+      </div>
+    </div>
+
+    <div class="sett-body" id="stab-shifts" style="display:none">
+      <div class="ssec">
+        <div class="ss-lbl">各シフトの勤務時間（自動配置の時間帯チェックに使用）</div>
+        <table class="stime-tbl"><thead><tr>
+          <th>シフト</th><th>開始</th><th>終了</th>
+          <th style="font-size:.7rem;color:var(--sub)">翌日終了の場合は +1（例: 09:00+1）</th>
+        </tr></thead><tbody id="stimeTblBody"></tbody></table>
+      </div>
+    </div>
+
+    <div class="sett-body" id="stab-codes" style="display:none">
+      <div class="ssec">
+        <div class="ss-lbl">シフト記号 → シフト区分のマッピング</div>
+        <p style="font-size:.78rem;color:var(--sub);margin-bottom:10px;line-height:1.6">
+          勤務表のセルに入力した記号（早、日、遅 など）と、配置表のシフト区分の対応を設定します。<br>
+          複数の記号は同じ区分に対応させられます。変更後は「保存」を押してください。
+        </p>
+        <table class="stime-tbl"><thead><tr>
+          <th>シフト区分（配置表）</th><th style="min-width:200px">対応する記号（読点区切り）</th>
+        </tr></thead><tbody id="codeMapTbl"></tbody></table>
+      </div>
+    </div>
+
+    <div class="sett-body" id="stab-tpl" style="display:none">
+      <div class="ssec">
+        <div class="ss-lbl">平日テンプレート（月〜金）</div>
+        <div class="tpl-grid">
+          <div>
+            <div style="font-size:.76rem;color:var(--sub);margin-bottom:3px">AM欄の行</div>
+            <textarea class="tpl-area" id="tplWdAm" rows="6"></textarea>
+          </div>
+          <div>
+            <div style="font-size:.76rem;color:var(--sub);margin-bottom:3px">午後の行（14:00・15:00）</div>
+            <textarea class="tpl-area" id="tplWdPm" rows="6"></textarea>
+          </div>
+        </div>
+        <div style="font-size:.73rem;color:var(--sub);margin-top:3px">※「1班」「2A班」などは班番号一致の職員を自動配置</div>
+      </div>
+      <div class="ssec">
+        <div class="ss-lbl">週末テンプレート（土・日）</div>
+        <div class="tpl-grid">
+          <div>
+            <div style="font-size:.76rem;color:var(--sub);margin-bottom:3px">AM欄の行</div>
+            <textarea class="tpl-area" id="tplWeAm" rows="6"></textarea>
+          </div>
+          <div>
+            <div style="font-size:.76rem;color:var(--sub);margin-bottom:3px">15:00欄の行</div>
+            <textarea class="tpl-area" id="tplWePm" rows="7"></textarea>
+          </div>
+        </div>
+        <div style="font-size:.73rem;color:var(--sub);margin-top:3px">※「す・た」「ひ」「さ・な」などは所属棟一致の職員を自動配置</div>
+      </div>
+      <div class="ssec">
+        <div class="ss-lbl">施設名</div>
+        <input class="ai" style="width:100%" id="facilityInp" placeholder="施設名（任意）">
+      </div>
+    </div>
+
+    <div class="sett-foot">
+      <button class="sclose" onclick="closeSettings()">キャンセル</button>
+      <button class="ssave" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const DEFAULT_TPL={
+  weekday:{am:['1班','2A班','2B班','3班','4班','フィルター掃除'],pm:['す・た','ひ','さ・な','フィルター掃除']},
+  weekend:{am:['す・た','ひ','さ・な','入浴','その他'],pm:['す・た(15:00〜)','(15:30〜)','(16:00〜16:30)','ひ','さ・な','各種業務']}
+};
+const LUNCH_ROWS=['食事支援','11:30〜休憩','パンプキン支援'];
+const SHIFT_TYPES=['当直・夜勤','早番','遅番','日勤','1','2A','2B','3','4'];
+const DOW_JP=['日','月','火','水','木','金','土'];
+const DEFAULT_SHIFT_TIMES={
+  '当直・夜勤':{start:'17:00',end:'09:00',nextDay:true},
+  '早番':{start:'07:00',end:'16:00',nextDay:false},
+  '遅番':{start:'10:00',end:'19:30',nextDay:false},
+  '日勤':{start:'09:00',end:'18:00',nextDay:false},
+  '1':{start:'08:30',end:'17:30',nextDay:false},
+  '2A':{start:'09:00',end:'18:00',nextDay:false},
+  '2B':{start:'09:30',end:'18:30',nextDay:false},
+  '3':{start:'10:30',end:'19:30',nextDay:false},
+  '4':{start:'12:00',end:'21:00',nextDay:false},
+};
+const BLOCK_TIMES={'AM':'10:00','昼食':'12:00','14:00':'14:30','15:00':'15:30','17:00':'17:30'};
+
+// Default code mapping: 勤務表記号 → SHIFT_TYPES
+const DEFAULT_CODE_MAP={
+  '当直・夜勤':['夜','夜1','夜2','夜3','当','当直'],
+  '早番':['早','早1','早2','早3','早4'],
+  '遅番':['遅','遅1','遅2','遅3','遅4'],
+  '日勤':['日','日1','日2'],
+  '1':['1'],'2A':['2A'],'2B':['2B'],'3':['3'],'4':['4'],
+};
+// Quick codes for kinmu grid popup
+const QUICK_CODES=[
+  {code:'早',cls:'kc-haya'},{code:'早2',cls:'kc-haya'},{code:'早3',cls:'kc-haya'},{code:'早4',cls:'kc-haya'},
+  {code:'日',cls:'kc-nichi'},{code:'日1',cls:'kc-nichi'},{code:'日2',cls:'kc-nichi'},
+  {code:'遅',cls:'kc-oso'},{code:'遅2',cls:'kc-oso'},{code:'遅3',cls:'kc-oso'},{code:'遅4',cls:'kc-oso'},
+  {code:'夜',cls:'kc-yoru'},{code:'夜1',cls:'kc-yoru'},{code:'夜2',cls:'kc-yoru'},{code:'夜3',cls:'kc-yoru'},
+  {code:'当',cls:'kc-tou'},
+  {code:'1',cls:'kc-1'},{code:'2A',cls:'kc-2a'},{code:'2B',cls:'kc-2b'},{code:'3',cls:'kc-3'},{code:'4',cls:'kc-4'},
+  {code:'休',cls:'kc-kyu'},{code:'－',cls:'kc-empty'},
+];
+function getCodeCls(code){
+  if(!code||code==='－') return 'kc-empty';
+  if(code.startsWith('早')) return 'kc-haya';
+  if(code.startsWith('遅')) return 'kc-oso';
+  if(code.startsWith('夜')) return 'kc-yoru';
+  if(code==='当'||code==='当直') return 'kc-tou';
+  if(code.startsWith('日')) return 'kc-nichi';
+  if(code==='休') return 'kc-kyu';
+  if(code==='1') return 'kc-1';
+  if(code==='2A') return 'kc-2a';
+  if(code==='2B') return 'kc-2b';
+  if(code==='3') return 'kc-3';
+  if(code==='4') return 'kc-4';
+  return 'kc-empty';
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let currentDate=todayStr();
+let config={
+  facilityName:'',staff:[],shiftTimes:{},
+  tpl:JSON.parse(JSON.stringify(DEFAULT_TPL)),
+  codeMap:JSON.parse(JSON.stringify(DEFAULT_CODE_MAP)),
+  touOptions:['す・た','ひ','さ・な'],
+};
+let dayData={shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};
+let editingCellId=null, editingBlockTime=null;
+let currentView='haichi';
+let kinmuYear,kinmuMonth; // for 勤務表 view
+let editingKinmuCell=null; // {name, day}
+
+// ============================================================
+// UTILS
+// ============================================================
+function todayStr(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function pad(n){return String(n).padStart(2,'0');}
+function isWeekend(ds){const d=new Date(ds+'T00:00:00');const w=d.getDay();return w===0||w===6;}
+function formatDate(ds){const d=new Date(ds+'T00:00:00');return `${d.getMonth()+1}月${d.getDate()}日（${DOW_JP[d.getDay()]}）`;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function parseNames(s){return s.split(/[,、\n]/).map(x=>x.trim()).filter(Boolean);}
+function timeToMins(ts){if(!ts) return -1;const nd=ts.includes('+1');const c=ts.replace('+1','');const[h,m]=c.split(':').map(Number);return h*60+(m||0)+(nd?1440:0);}
+function getShiftTime(st){return config.shiftTimes?.[st]||DEFAULT_SHIFT_TIMES[st]||null;}
+function isShiftActive(st,bt){const t=getShiftTime(st);if(!t) return false;const bl=timeToMins(bt);const s=timeToMins(t.start);let e=timeToMins(t.end);if(t.nextDay||e<s) e+=1440;return bl>=s&&bl<e;}
+function getAllShiftStaff(){const m={};SHIFT_TYPES.forEach(st=>{parseNames(dayData.shifts[st]||'').forEach(n=>{if(n) m[n]=st;});});return m;}
+function getAvailableAtBlock(bt){const all=getAllShiftStaff();return Object.entries(all).filter(([,st])=>isShiftActive(st,bt)).map(([n])=>n);}
+function getStaffInfo(name){return config.staff?.find(s=>s.name===name)||null;}
+function detectBan(role){const m=role.match(/^([0-9]|2A|2B)班/);return m?m[1]:null;}
+function detectTou(role){for(const t of(config.touOptions||['す・た','ひ','さ・な'])){if(role===t||role.startsWith(t)) return t;}return null;}
+
+// Map kinmu code to shift type
+function mapCode(code){
+  if(!code||code==='－'||code==='休') return null;
+  const cm=config.codeMap||DEFAULT_CODE_MAP;
+  for(const[st,codes] of Object.entries(cm)){if(codes.includes(code)) return st;}
+  // fuzzy fallback
+  if(code.startsWith('早')) return '早番';
+  if(code.startsWith('遅')) return '遅番';
+  if(code.startsWith('夜')||code==='当'||code==='当直') return '当直・夜勤';
+  if(code.startsWith('日')) return '日勤';
+  if(['1','2A','2B','3','4'].includes(code)) return code;
+  return null;
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+function loadConfig(){
+  try{const s=localStorage.getItem('haichi_cfg3');if(s){const p=JSON.parse(s);config={...config,...p};}
+    if(!config.tpl) config.tpl=JSON.parse(JSON.stringify(DEFAULT_TPL));
+    if(!config.shiftTimes) config.shiftTimes={};
+    if(!config.codeMap) config.codeMap=JSON.parse(JSON.stringify(DEFAULT_CODE_MAP));
+    if(!config.touOptions) config.touOptions=['す・た','ひ','さ・な'];
+  }catch(e){}
+}
+function _saveConfig(){localStorage.setItem('haichi_cfg3',JSON.stringify(config));}
+function loadDay(d){
+  try{const s=localStorage.getItem(`haichi_${d}`);
+    dayData=s?{...{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''},...JSON.parse(s)}:{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};
+  }catch(e){dayData={shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};}
+}
+function autosave(){localStorage.setItem(`haichi_${currentDate}`,JSON.stringify(dayData));}
+
+// Kinmu monthly schedule
+function kinmuKey(y,m){return `haichi_kinmu_${y}-${pad(m)}`;}
+function loadKinmu(y,m){
+  try{const s=localStorage.getItem(kinmuKey(y,m));return s?JSON.parse(s):{schedule:{}};}
+  catch(e){return {schedule:{}};}
+}
+function saveKinmu(y,m,data){localStorage.setItem(kinmuKey(y,m),JSON.stringify(data));}
+function setKinmuCell(y,m,name,day,code){
+  const data=loadKinmu(y,m);
+  if(!data.schedule[name]) data.schedule[name]={};
+  if(code) data.schedule[name][day]=code;
+  else delete data.schedule[name][day];
+  saveKinmu(y,m,data);
+}
+
+// ============================================================
+// TEMPLATE
+// ============================================================
+function getTemplate(){
+  const t=config.tpl||DEFAULT_TPL;
+  const isWe=isWeekend(currentDate);
+  const base=isWe?t.weekend:t.weekday;
+  const pm=[...(base.pm||[])];
+  return [
+    {time:'AM',rows:[...(base.am||[])]},
+    {time:'昼食',rows:LUNCH_ROWS},
+    {time:'14:00',rows:isWe?['す・た','ひ','さ・な','','各種業務']:[...pm]},
+    {time:'15:00',rows:[...pm]},
+    {time:'17:00',rows:['食事対応']},
+  ];
+}
+
+// ============================================================
+// VIEW SWITCHING
+// ============================================================
+function switchView(v){
+  currentView=v;
+  document.getElementById('view-haichi').style.display=v==='haichi'?'':'none';
+  document.getElementById('view-kinmu').style.display=v==='kinmu'?'':'none';
+  document.getElementById('vtab-haichi').classList.toggle('act',v==='haichi');
+  document.getElementById('vtab-kinmu').classList.toggle('act',v==='kinmu');
+  document.getElementById('hdrDateNav').style.display=v==='haichi'?'':'none';
+  document.getElementById('btnLoadKinmu').style.display=v==='haichi'?'':'none';
+  document.getElementById('tplBadge').style.display=v==='haichi'?'':'none';
+  if(v==='kinmu'){renderKinmu();}
+}
+
+// ============================================================
+// 配置表 RENDER
+// ============================================================
+function renderAll(){
+  updateHeader();renderShiftGrid();renderTable();renderBottom();
+  document.getElementById('gyojiInp').value=dayData.gyoji||'';
+}
+function updateHeader(){
+  document.getElementById('dateLabel').textContent=formatDate(currentDate);
+  document.getElementById('tplBadge').textContent=isWeekend(currentDate)?'テンプレート：週末（土・日）':'テンプレート：平日（月〜金）';
+}
+function renderShiftGrid(){
+  document.getElementById('shiftGrid').innerHTML=SHIFT_TYPES.map(t=>{
+    const v=esc(dayData.shifts[t]||'');
+    return `<div class="shift-row"><span class="s-lbl">${esc(t)}</span>
+      <input class="s-inp" value="${v}" placeholder="例：山科、青木"
+        data-shift="${esc(t)}" oninput="onShiftInput(this)">
+    </div>`;
+  }).join('');
+}
+function renderTable(){
+  const tpl=getTemplate();
+  const totalRows=tpl.reduce((s,b)=>s+b.rows.length,0);
+  let html=`<thead><tr>
+    <th class="th-date" colspan="3">${esc(formatDate(currentDate))}</th>
+    <th style="font-size:.76rem;min-width:176px">個別支援・通院・外出等</th>
+  </tr></thead><tbody>`;
+  let rightAdded=false;
+  tpl.forEach((block,bi)=>{
+    block.rows.forEach((role,ri)=>{
+      const cid=`${bi}_${ri}`;
+      const val=dayData.cells[cid]||'';
+      const isAuto=dayData.autoCells&&dayData.autoCells[cid];
+      html+='<tr>';
+      if(ri===0) html+=`<td class="time-td" rowspan="${block.rows.length}">${esc(block.time)}</td>`;
+      html+=`<td class="role-td">${esc(role)}</td>`;
+      html+=`<td class="staff-td${!val.trim()?' empty':''}${isAuto?' auto-filled':''}"
+        onclick="openDlg('${cid}','${esc(block.time)}','${esc(role)}')" data-id="${cid}">
+        <div class="staff-display">${esc(val)}</div></td>`;
+      if(!rightAdded){rightAdded=true;
+        html+=`<td class="right-td" id="rightTd" rowspan="${totalRows}">${buildRightHtml()}</td>`;}
+      html+='</tr>';
+    });
+  });
+  html+='</tbody>';
+  document.getElementById('mainTable').innerHTML=html;
+  document.querySelectorAll('.event-inp').forEach(ar);
+}
+function buildRightHtml(){
+  let h=`<div class="haichi-line"><span class="haichi-lbl">配置：</span>
+    <input class="haichi-inp" value="${esc(dayData.haichi||'')}" placeholder="担当者"
+      oninput="dayData.haichi=this.value;autosave()"></div>`;
+  (dayData.rightEvents||[]).forEach((ev,i)=>{
+    h+=`<div class="event-line">
+      <textarea class="event-inp" rows="1"
+        oninput="dayData.rightEvents[${i}]=this.value;autosave();ar(this)"
+        onfocus="ar(this)">${esc(ev||'')}</textarea>
+      <button class="event-del" onclick="removeEvent(${i})">✕</button></div>`;
+  });
+  h+=`<button class="add-event-btn" onclick="addEvent()">＋ 記入を追加</button>`;
+  return h;
+}
+function refreshRightCol(){
+  const td=document.getElementById('rightTd');
+  if(td){td.innerHTML=buildRightHtml();document.querySelectorAll('.event-inp').forEach(ar);}
+}
+function ar(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+function renderBottom(){
+  document.getElementById('bottomGrid').innerHTML=SHIFT_TYPES.map(t=>{
+    const v=(dayData.shifts[t]||'').trim();
+    return `<div class="bottom-row"><span class="b-lbl">${esc(t)}：</span><span>${esc(v)}</span></div>`;
+  }).join('');
+}
+
+// ============================================================
+// 配置表 EVENTS
+// ============================================================
+function onShiftInput(inp){dayData.shifts[inp.dataset.shift]=inp.value;autosave();renderBottom();}
+function addEvent(){
+  dayData.rightEvents=dayData.rightEvents||[];dayData.rightEvents.push('');autosave();refreshRightCol();
+  setTimeout(()=>{const els=document.querySelectorAll('.event-inp');if(els.length) els[els.length-1].focus();},40);
+}
+function removeEvent(i){dayData.rightEvents.splice(i,1);autosave();refreshRightCol();}
+
+// ============================================================
+// LOAD FROM KINMU (auto-fill shifts from monthly schedule)
+// ============================================================
+function loadFromKinmu(){
+  const [y,m,d]=currentDate.split('-').map(Number);
+  const data=loadKinmu(y,m);
+  if(!data.schedule||Object.keys(data.schedule).length===0){
+    alert(`${y}年${m}月の勤務表データが未入力です。\n「📅 勤務表（月）」タブから入力してください。`);
+    return;
+  }
+  // Build shift groups
+  const groups={};SHIFT_TYPES.forEach(st=>{groups[st]=[];});
+  Object.entries(data.schedule).forEach(([name,days])=>{
+    const code=days[d];if(!code) return;
+    const st=mapCode(code);
+    if(st&&groups[st]) groups[st].push(name);
+  });
+  // Update shifts
+  SHIFT_TYPES.forEach(st=>{
+    if(groups[st].length>0) dayData.shifts[st]=groups[st].join('、');
+  });
+  autosave();renderShiftGrid();renderBottom();
+  document.getElementById('loadNotice').style.display='flex';
+}
+
+// ============================================================
+// CELL DIALOG
+// ============================================================
+function openDlg(cid,time,role){
+  editingCellId=cid;editingBlockTime=BLOCK_TIMES[time]||'10:00';
+  document.getElementById('dlgTitle').textContent=`📝 ${time}　${role}`;
+  const allShift=getAllShiftStaff();
+  const avail=getAvailableAtBlock(editingBlockTime);
+  const cur=dayData.cells[cid]||'';
+  document.getElementById('dlgTa').value=cur;
+  const sel=parseNames(cur);
+  document.getElementById('dlgNote').textContent=
+    `この時間帯に勤務中：${avail.length}名 / 本日出勤計：${Object.keys(allShift).length}名`;
+  const sorted=[...avail.filter(n=>n in allShift),...Object.keys(allShift).filter(n=>!avail.includes(n))];
+  const dedup=[...new Set(sorted)];
+  let chips='';
+  dedup.forEach(name=>{
+    const isAvail=avail.includes(name);const isSel=sel.includes(name);
+    const info=getStaffInfo(name);const st=allShift[name]||'';
+    const cls=isSel?'chip-sel':isAvail?'chip-avail':'chip-off';
+    const attrs=[];
+    if(info?.ban) attrs.push(`<span class="chip-meta">[${esc(info.ban)}]</span>`);
+    if(info?.tou) attrs.push(`<span class="chip-meta">[${esc(info.tou)}]</span>`);
+    if(info?.gender) attrs.push(`<span class="chip-meta">${esc(info.gender)}</span>`);
+    attrs.push(`<span class="chip-meta">[${esc(st)}]</span>`);
+    chips+=`<button class="staff-chip ${cls}" onclick="toggleChip(this)" data-name="${esc(name)}"
+      ${!isAvail?' title="この時間帯は勤務外"':''}>
+      ${esc(name)}${attrs.join('')}</button>`;
+  });
+  document.getElementById('dlgChips').innerHTML=chips||'<span style="color:#aaa;font-size:.8rem">シフトにスタッフが入力されていません</span>';
+  document.getElementById('cellOverlay').classList.add('show');
+  document.getElementById('dlgTa').focus();
+}
+function toggleChip(btn){
+  const name=btn.dataset.name;const ta=document.getElementById('dlgTa');
+  const names=parseNames(ta.value);const idx=names.indexOf(name);
+  if(idx>=0){names.splice(idx,1);btn.classList.remove('chip-sel');}
+  else{names.push(name);btn.classList.add('chip-sel');}
+  ta.value=names.join('、');
+}
+function closeDlg(){document.getElementById('cellOverlay').classList.remove('show');editingCellId=null;}
+function saveDlg(){
+  if(!editingCellId) return;
+  const val=document.getElementById('dlgTa').value.trim();
+  dayData.cells[editingCellId]=val;
+  if(dayData.autoCells) delete dayData.autoCells[editingCellId];
+  autosave();
+  const td=document.querySelector(`[data-id="${editingCellId}"]`);
+  if(td){td.querySelector('.staff-display').innerHTML=esc(val);td.classList.toggle('empty',!val.trim());td.classList.remove('auto-filled');}
+  closeDlg();
+}
+
+// ============================================================
+// AUTO PLACEMENT
+// ============================================================
+function openAutoConfirm(){document.getElementById('autoOverlay').classList.add('show');}
+function closeAutoConfirm(){document.getElementById('autoOverlay').classList.remove('show');}
+function runAutoPlace(){
+  const overwrite=document.getElementById('autoOverwrite').checked;
+  closeAutoConfirm();
+  const tpl=getTemplate();dayData.autoCells=dayData.autoCells||{};
+  tpl.forEach((block,bi)=>{
+    const bt=BLOCK_TIMES[block.time]||'10:00';
+    const avail=getAvailableAtBlock(bt);
+    const used=new Set();
+    // Pass 1: 班/棟 rows
+    block.rows.forEach((role,ri)=>{
+      const cid=`${bi}_${ri}`;if(!overwrite&&dayData.cells[cid]?.trim()) return;
+      const ban=detectBan(role);const tou=detectTou(role);if(!ban&&!tou) return;
+      const matched=avail.filter(name=>{
+        if(used.has(name)) return false;
+        const info=getStaffInfo(name);
+        return (ban&&info?.ban===ban)||(tou&&info?.tou===tou);
+      });
+      if(matched.length>0){dayData.cells[cid]=matched.join('、');dayData.autoCells[cid]=true;matched.forEach(n=>used.add(n));}
+    });
+    // Pass 2: general rows
+    const rem=avail.filter(n=>!used.has(n));
+    const genRows=block.rows.map((r,i)=>({r,i})).filter(({r})=>!detectBan(r)&&!detectTou(r)&&r.trim()!=='');
+    if(genRows.length>0&&rem.length>0){
+      const per=Math.ceil(rem.length/genRows.length);
+      genRows.forEach(({i:ri},gi)=>{
+        const cid=`${bi}_${ri}`;if(!overwrite&&dayData.cells[cid]?.trim()) return;
+        const chunk=rem.slice(gi*per,(gi+1)*per);
+        if(chunk.length>0){dayData.cells[cid]=chunk.join('、');dayData.autoCells[cid]=true;}
+      });
+    }
+  });
+  autosave();renderTable();
+}
+
+// ============================================================
+// DATE NAVIGATION
+// ============================================================
+function changeDate(delta){const d=new Date(currentDate+'T00:00:00');d.setDate(d.getDate()+delta);currentDate=d.toISOString().split('T')[0];loadDay(currentDate);renderAll();}
+function pickDate(){const el=document.getElementById('hiddenDate');el.value=currentDate;el.showPicker?el.showPicker():el.click();}
+function onDatePick(v){if(!v) return;currentDate=v;loadDay(currentDate);renderAll();}
+
+// ============================================================
+// 勤務表 (KINMU) RENDER
+// ============================================================
+function renderKinmu(){
+  const today=new Date();
+  if(!kinmuYear){kinmuYear=today.getFullYear();kinmuMonth=today.getMonth()+1;}
+  document.getElementById('kinmuMonthLbl').textContent=`${kinmuYear}年${kinmuMonth}月`;
+  const daysInMonth=new Date(kinmuYear,kinmuMonth,0).getDate();
+  const data=loadKinmu(kinmuYear,kinmuMonth);
+  const todayDs=todayStr();
+  // Header
+  let thead='<thead><tr><th class="kname-hdr">氏名</th>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${kinmuYear}-${pad(kinmuMonth)}-${pad(d)}`;
+    const dow=new Date(ds+'T00:00:00').getDay();
+    const cls=dow===0?'kth-sun':dow===6?'kth-sat':ds===todayDs?'kth-today':'';
+    thead+=`<th class="${cls}">${d}<br><span style="font-size:.65rem">${DOW_JP[dow]}</span></th>`;
+  }
+  thead+='</tr></thead>';
+  // Body - show all staff from master
+  const staffList=(config.staff||[]).map(s=>s.name);
+  // Also add names from saved schedule not in master
+  Object.keys(data.schedule||{}).forEach(name=>{if(!staffList.includes(name)) staffList.push(name);});
+
+  let tbody='<tbody>';
+  staffList.forEach(name=>{
+    const days=data.schedule[name]||{};
+    tbody+=`<tr><td class="name-col">${esc(name)}</td>`;
+    for(let d=1;d<=daysInMonth;d++){
+      const code=days[d]||'';
+      const cls=getCodeCls(code);
+      tbody+=`<td class="kcell ${cls}" onclick="openKinmuPopup(event,'${esc(name)}',${d})">${esc(code)}</td>`;
+    }
+    tbody+='</tr>';
+  });
+  tbody+='</tbody>';
+  document.getElementById('kinmuTbl').innerHTML=thead+tbody;
+}
+
+function changeKinmuMonth(delta){
+  kinmuMonth+=delta;
+  if(kinmuMonth>12){kinmuMonth=1;kinmuYear++;}
+  if(kinmuMonth<1){kinmuMonth=12;kinmuYear--;}
+  renderKinmu();
+}
+
+// ============================================================
+// CODE POPUP (kinmu grid)
+// ============================================================
+function openKinmuPopup(evt,name,day){
+  editingKinmuCell={name,day};
+  const popup=document.getElementById('codePopup');
+  document.getElementById('popupTitle').textContent=`${name} - ${kinmuMonth}/${day}`;
+  const data=loadKinmu(kinmuYear,kinmuMonth);
+  const cur=(data.schedule[name]||{})[day]||'';
+  // Build code buttons
+  let html='';
+  QUICK_CODES.forEach(({code,cls})=>{
+    const isSel=code===cur;
+    html+=`<div class="code-btn ${cls}" style="${isSel?'outline:2px solid #333;outline-offset:1px':''}"
+      onclick="selectCode('${esc(code)}')">${esc(code)}</div>`;
+  });
+  html+=`<div class="code-btn cb-clear" onclick="selectCode('')">クリア</div>`;
+  document.getElementById('codeGrid').innerHTML=html;
+  // Position popup
+  const rect=evt.currentTarget.getBoundingClientRect();
+  const pw=200,ph=260;
+  let left=rect.right+4;let top=rect.top;
+  if(left+pw>window.innerWidth) left=rect.left-pw-4;
+  if(top+ph>window.innerHeight) top=window.innerHeight-ph-8;
+  popup.style.left=Math.max(4,left)+'px';
+  popup.style.top=Math.max(4,top)+'px';
+  popup.classList.add('show');
+  evt.stopPropagation();
+}
+function selectCode(code){
+  if(!editingKinmuCell) return;
+  const {name,day}=editingKinmuCell;
+  setKinmuCell(kinmuYear,kinmuMonth,name,day,code);
+  closePopup();
+  renderKinmu();
+}
+function closePopup(){
+  document.getElementById('codePopup').classList.remove('show');
+  editingKinmuCell=null;
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#codePopup')&&!e.target.closest('.kcell')){closePopup();}
+});
+
+// ============================================================
+// SETTINGS
+// ============================================================
+let activeStab='staff';
+function switchStab(tab,btn){
+  activeStab=tab;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('act'));btn.classList.add('act');
+  ['staff','shifts','codes','tpl'].forEach(t=>{document.getElementById(`stab-${t}`).style.display=t===tab?'block':'none';});
+}
+function openSettings(){
+  renderStaffTable();renderShiftTimeTbl();renderCodeMap();
+  const t=config.tpl||DEFAULT_TPL;
+  document.getElementById('tplWdAm').value=(t.weekday?.am||[]).join('\n');
+  document.getElementById('tplWdPm').value=(t.weekday?.pm||[]).join('\n');
+  document.getElementById('tplWeAm').value=(t.weekend?.am||[]).join('\n');
+  document.getElementById('tplWePm').value=(t.weekend?.pm||[]).join('\n');
+  document.getElementById('facilityInp').value=config.facilityName||'';
+  fillTouSelect();
+  document.getElementById('settOverlay').classList.add('show');
+}
+function fillTouSelect(){
+  const sel=document.getElementById('nTou');
+  const opts=config.touOptions||['す・た','ひ','さ・な'];
+  sel.innerHTML='<option value="">所属棟なし</option>'+opts.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
+}
+function renderStaffTable(){
+  const tbody=document.getElementById('staffTblBody');
+  const staff=config.staff||[];
+  const touOpts=(config.touOptions||['す・た','ひ','さ・な']);
+  if(staff.length===0){tbody.innerHTML='<tr><td colspan="6" style="color:#aaa;text-align:center;padding:10px">職員が登録されていません</td></tr>';return;}
+  tbody.innerHTML=staff.map((s,i)=>{
+    const touSel='<option value="">なし</option>'+touOpts.map(o=>`<option value="${esc(o)}"${s.tou===o?' selected':''}>${esc(o)}</option>`).join('');
+    const banSel='<option value="">なし</option>'+['1','2A','2B','3','4'].map(b=>`<option value="${b}"${s.ban===b?' selected':''}>${b}</option>`).join('');
+    return `<tr>
+      <td><input class="ti" value="${esc(s.name)}" oninput="config.staff[${i}].name=this.value"></td>
+      <td><select class="ts" onchange="config.staff[${i}].gender=this.value">
+        <option value=""${!s.gender?' selected':''}>—</option>
+        <option value="男"${s.gender==='男'?' selected':''}>男</option>
+        <option value="女"${s.gender==='女'?' selected':''}>女</option>
+      </select></td>
+      <td><select class="ts" onchange="config.staff[${i}].tou=this.value">${touSel}</select></td>
+      <td><select class="ts" onchange="config.staff[${i}].ban=this.value">${banSel}</select></td>
+      <td><input class="ti" value="${esc(s.tags||'')}" placeholder="入浴担当、リーダー…"
+        oninput="config.staff[${i}].tags=this.value"></td>
+      <td><button class="tdel" onclick="delStaff(${i})">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+function addStaff(){
+  const name=document.getElementById('nName').value.trim();if(!name) return;
+  if(!config.staff) config.staff=[];
+  config.staff.push({id:Date.now()+'',name,
+    gender:document.getElementById('nGender').value,
+    tou:document.getElementById('nTou').value,
+    ban:document.getElementById('nBan').value,
+    tags:document.getElementById('nTags').value.trim()});
+  ['nName','nTags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nGender').value='';document.getElementById('nTou').value='';document.getElementById('nBan').value='';
+  renderStaffTable();
+}
+function delStaff(i){config.staff.splice(i,1);renderStaffTable();}
+function renderShiftTimeTbl(){
+  document.getElementById('stimeTblBody').innerHTML=SHIFT_TYPES.map(st=>{
+    const cur=config.shiftTimes?.[st]||DEFAULT_SHIFT_TIMES[st]||{};
+    const startV=cur.start||'';const endV=(cur.end||'')+(cur.nextDay?'+1':'');
+    return `<tr>
+      <td style="font-weight:700">${esc(st)}</td>
+      <td><input class="tinp" type="text" value="${esc(startV)}" placeholder="09:00"
+        oninput="saveStf('${esc(st)}','start',this.value)"></td>
+      <td><input class="tinp" type="text" value="${esc(endV)}" placeholder="18:00"
+        oninput="saveStf('${esc(st)}','end',this.value)"></td>
+      <td></td></tr>`;
+  }).join('');
+}
+function saveStf(st,field,rawVal){
+  if(!config.shiftTimes) config.shiftTimes={};
+  if(!config.shiftTimes[st]) config.shiftTimes[st]={...DEFAULT_SHIFT_TIMES[st]};
+  if(field==='end'){config.shiftTimes[st].end=rawVal.replace('+1','');config.shiftTimes[st].nextDay=rawVal.includes('+1');}
+  else config.shiftTimes[st][field]=rawVal;
+}
+function renderCodeMap(){
+  const cm=config.codeMap||DEFAULT_CODE_MAP;
+  document.getElementById('codeMapTbl').innerHTML=SHIFT_TYPES.map(st=>{
+    const codes=(cm[st]||[]).join('、');
+    return `<tr>
+      <td style="font-weight:700;white-space:nowrap">${esc(st)}</td>
+      <td><input class="ti" value="${esc(codes)}" placeholder="例：早、早2、早3"
+        oninput="updateCodeMap('${esc(st)}',this.value)"></td></tr>`;
+  }).join('');
+}
+function updateCodeMap(st,val){
+  if(!config.codeMap) config.codeMap={};
+  config.codeMap[st]=val.split(/[,、]/).map(s=>s.trim()).filter(Boolean);
+}
+function closeSettings(){document.getElementById('settOverlay').classList.remove('show');}
+function saveSettings(){
+  config.facilityName=document.getElementById('facilityInp').value.trim();
+  const parseArea=id=>document.getElementById(id).value.split('\n').map(s=>s.trim());
+  config.tpl={
+    weekday:{am:parseArea('tplWdAm'),pm:parseArea('tplWdPm')},
+    weekend:{am:parseArea('tplWeAm'),pm:parseArea('tplWePm')},
+  };
+  const weAm=config.tpl.weekend.am.filter(r=>r.trim()&&!r.match(/^\(/));
+  config.touOptions=[...new Set([...weAm,...(config.touOptions||[])])];
+  _saveConfig();closeSettings();renderAll();
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeDlg();closeSettings();closeAutoConfirm();closePopup();}
+  if(e.key==='Enter'&&document.getElementById('cellOverlay').classList.contains('show')&&e.target.tagName!=='TEXTAREA') saveDlg();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded',()=>{
+  loadConfig();loadDay(currentDate);renderAll();
+  document.addEventListener('input',e=>{if(e.target.classList.contains('event-inp')) ar(e.target);});
+});
+</script>
+</body>
+</html>
