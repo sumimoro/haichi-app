@@ -252,6 +252,8 @@ textarea,input,select{font-family:inherit;font-size:inherit;}
   .table-wrap{overflow:visible;}
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="app">
@@ -483,6 +485,23 @@ textarea,input,select{font-family:inherit;font-size:inherit;}
 
 <script>
 // ============================================================
+// FIREBASE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBp8FWLMw6PFXj-gm4o3K7WV1ooqX57LF4",
+  authDomain: "haisetu-check.firebaseapp.com",
+  projectId: "haisetu-check",
+  storageBucket: "haisetu-check.firebasestorage.app",
+  messagingSenderId: "1036699202830",
+  appId: "1:1036699202830:web:7882891cb0c22edb65d35f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const COL_CONFIG = 'haichi_config';
+const COL_DAY    = 'haichi_day';
+const COL_KINMU  = 'haichi_kinmu';
+
+// ============================================================
 // CONSTANTS
 // ============================================================
 const DEFAULT_TPL={
@@ -588,37 +607,85 @@ function mapCode(code){
 }
 
 // ============================================================
-// STORAGE
+// STORAGE (Firestore)
 // ============================================================
-function loadConfig(){
-  try{const s=localStorage.getItem('haichi_cfg3');if(s){const p=JSON.parse(s);config={...config,...p};}
+function showLoading(on){
+  let el=document.getElementById('fsLoading');
+  if(!el){
+    el=document.createElement('div');
+    el.id='fsLoading';
+    el.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.75);z-index:9999;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#1a4f72;font-weight:700;gap:8px;';
+    el.innerHTML='<span style="animation:spin 1s linear infinite;display:inline-block">⏳</span> 読込中…';
+    const st=document.createElement('style');
+    st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+    document.body.appendChild(el);
+  }
+  el.style.display=on?'flex':'none';
+}
+
+async function loadConfig(){
+  try{
+    const snap=await db.collection(COL_CONFIG).doc('settings').get();
+    if(snap.exists){const p=snap.data();config={...config,...p};}
     if(!config.tpl) config.tpl=JSON.parse(JSON.stringify(DEFAULT_TPL));
     if(!config.shiftTimes) config.shiftTimes={};
     if(!config.codeMap) config.codeMap=JSON.parse(JSON.stringify(DEFAULT_CODE_MAP));
     if(!config.touOptions) config.touOptions=['す・た','ひ','さ・な'];
-  }catch(e){}
+  }catch(e){console.error('loadConfig',e);}
 }
-function _saveConfig(){localStorage.setItem('haichi_cfg3',JSON.stringify(config));}
-function loadDay(d){
-  try{const s=localStorage.getItem(`haichi_${d}`);
-    dayData=s?{...{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''},...JSON.parse(s)}:{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};
+
+async function _saveConfig(){
+  try{await db.collection(COL_CONFIG).doc('settings').set(config);}
+  catch(e){console.error('saveConfig',e);}
+}
+
+async function loadDay(d){
+  try{
+    const snap=await db.collection(COL_DAY).doc(d).get();
+    dayData=snap.exists
+      ?{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:'',...snap.data()}
+      :{shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};
   }catch(e){dayData={shifts:{},cells:{},rightEvents:[],haichi:'',gyoji:''};}
 }
-function autosave(){localStorage.setItem(`haichi_${currentDate}`,JSON.stringify(dayData));}
 
-// Kinmu monthly schedule
-function kinmuKey(y,m){return `haichi_kinmu_${y}-${pad(m)}`;}
-function loadKinmu(y,m){
-  try{const s=localStorage.getItem(kinmuKey(y,m));return s?JSON.parse(s):{schedule:{}};}
-  catch(e){return {schedule:{}};}
+let _saveTimer=null;
+function autosave(){
+  if(_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{
+    db.collection(COL_DAY).doc(currentDate).set(dayData)
+      .catch(e=>console.error('autosave',e));
+  },800);
 }
-function saveKinmu(y,m,data){localStorage.setItem(kinmuKey(y,m),JSON.stringify(data));}
-function setKinmuCell(y,m,name,day,code){
-  const data=loadKinmu(y,m);
+
+// Kinmu monthly schedule – in-memory cache + Firestore
+const _kinmuCache={};
+
+async function loadKinmuAsync(y,m){
+  const key=`${y}-${pad(m)}`;
+  if(!_kinmuCache[key]){
+    try{
+      const snap=await db.collection(COL_KINMU).doc(key).get();
+      _kinmuCache[key]=snap.exists?snap.data():{schedule:{}};
+    }catch(e){_kinmuCache[key]={schedule:{}};}
+  }
+  return _kinmuCache[key];
+}
+
+// synchronous accessor (uses cache; always call loadKinmuAsync first)
+function loadKinmu(y,m){
+  const key=`${y}-${pad(m)}`;
+  return _kinmuCache[key]||{schedule:{}};
+}
+
+async function setKinmuCell(y,m,name,day,code){
+  const key=`${y}-${pad(m)}`;
+  const data=await loadKinmuAsync(y,m);
   if(!data.schedule[name]) data.schedule[name]={};
   if(code) data.schedule[name][day]=code;
   else delete data.schedule[name][day];
-  saveKinmu(y,m,data);
+  _kinmuCache[key]=data;
+  await db.collection(COL_KINMU).doc(key).set(data);
 }
 
 // ============================================================
@@ -740,21 +807,21 @@ function removeEvent(i){dayData.rightEvents.splice(i,1);autosave();refreshRightC
 // ============================================================
 // LOAD FROM KINMU (auto-fill shifts from monthly schedule)
 // ============================================================
-function loadFromKinmu(){
+async function loadFromKinmu(){
   const [y,m,d]=currentDate.split('-').map(Number);
-  const data=loadKinmu(y,m);
+  showLoading(true);
+  const data=await loadKinmuAsync(y,m);
+  showLoading(false);
   if(!data.schedule||Object.keys(data.schedule).length===0){
     alert(`${y}年${m}月の勤務表データが未入力です。\n「📅 勤務表（月）」タブから入力してください。`);
     return;
   }
-  // Build shift groups
   const groups={};SHIFT_TYPES.forEach(st=>{groups[st]=[];});
   Object.entries(data.schedule).forEach(([name,days])=>{
     const code=days[d];if(!code) return;
     const st=mapCode(code);
     if(st&&groups[st]) groups[st].push(name);
   });
-  // Update shifts
   SHIFT_TYPES.forEach(st=>{
     if(groups[st].length>0) dayData.shifts[st]=groups[st].join('、');
   });
@@ -856,19 +923,28 @@ function runAutoPlace(){
 // ============================================================
 // DATE NAVIGATION
 // ============================================================
-function changeDate(delta){const d=new Date(currentDate+'T00:00:00');d.setDate(d.getDate()+delta);currentDate=d.toISOString().split('T')[0];loadDay(currentDate);renderAll();}
+async function changeDate(delta){
+  const d=new Date(currentDate+'T00:00:00');d.setDate(d.getDate()+delta);
+  currentDate=d.toISOString().split('T')[0];
+  showLoading(true);await loadDay(currentDate);showLoading(false);renderAll();
+}
 function pickDate(){const el=document.getElementById('hiddenDate');el.value=currentDate;el.showPicker?el.showPicker():el.click();}
-function onDatePick(v){if(!v) return;currentDate=v;loadDay(currentDate);renderAll();}
+async function onDatePick(v){
+  if(!v) return;currentDate=v;
+  showLoading(true);await loadDay(currentDate);showLoading(false);renderAll();
+}
 
 // ============================================================
 // 勤務表 (KINMU) RENDER
 // ============================================================
-function renderKinmu(){
+async function renderKinmu(){
   const today=new Date();
   if(!kinmuYear){kinmuYear=today.getFullYear();kinmuMonth=today.getMonth()+1;}
   document.getElementById('kinmuMonthLbl').textContent=`${kinmuYear}年${kinmuMonth}月`;
   const daysInMonth=new Date(kinmuYear,kinmuMonth,0).getDate();
-  const data=loadKinmu(kinmuYear,kinmuMonth);
+  showLoading(true);
+  const data=await loadKinmuAsync(kinmuYear,kinmuMonth);
+  showLoading(false);
   const todayDs=todayStr();
   // Header
   let thead='<thead><tr><th class="kname-hdr">氏名</th>';
@@ -899,11 +975,11 @@ function renderKinmu(){
   document.getElementById('kinmuTbl').innerHTML=thead+tbody;
 }
 
-function changeKinmuMonth(delta){
+async function changeKinmuMonth(delta){
   kinmuMonth+=delta;
   if(kinmuMonth>12){kinmuMonth=1;kinmuYear++;}
   if(kinmuMonth<1){kinmuMonth=12;kinmuYear--;}
-  renderKinmu();
+  await renderKinmu();
 }
 
 // ============================================================
@@ -935,12 +1011,12 @@ function openKinmuPopup(evt,name,day){
   popup.classList.add('show');
   evt.stopPropagation();
 }
-function selectCode(code){
+async function selectCode(code){
   if(!editingKinmuCell) return;
   const {name,day}=editingKinmuCell;
-  setKinmuCell(kinmuYear,kinmuMonth,name,day,code);
   closePopup();
-  renderKinmu();
+  await setKinmuCell(kinmuYear,kinmuMonth,name,day,code);
+  await renderKinmu();
 }
 function closePopup(){
   document.getElementById('codePopup').classList.remove('show');
@@ -1045,7 +1121,7 @@ function updateCodeMap(st,val){
   config.codeMap[st]=val.split(/[,、]/).map(s=>s.trim()).filter(Boolean);
 }
 function closeSettings(){document.getElementById('settOverlay').classList.remove('show');}
-function saveSettings(){
+async function saveSettings(){
   config.facilityName=document.getElementById('facilityInp').value.trim();
   const parseArea=id=>document.getElementById(id).value.split('\n').map(s=>s.trim());
   config.tpl={
@@ -1054,7 +1130,7 @@ function saveSettings(){
   };
   const weAm=config.tpl.weekend.am.filter(r=>r.trim()&&!r.match(/^\(/));
   config.touOptions=[...new Set([...weAm,...(config.touOptions||[])])];
-  _saveConfig();closeSettings();renderAll();
+  await _saveConfig();closeSettings();renderAll();
 }
 
 // ============================================================
@@ -1068,8 +1144,11 @@ document.addEventListener('keydown',e=>{
 // ============================================================
 // INIT
 // ============================================================
-window.addEventListener('DOMContentLoaded',()=>{
-  loadConfig();loadDay(currentDate);renderAll();
+window.addEventListener('DOMContentLoaded',async()=>{
+  showLoading(true);
+  await Promise.all([loadConfig(),loadDay(currentDate)]);
+  showLoading(false);
+  renderAll();
   document.addEventListener('input',e=>{if(e.target.classList.contains('event-inp')) ar(e.target);});
 });
 </script>
