@@ -1,0 +1,7 @@
+{
+  "hosting": {
+    "site": "aiikugakuen-haichi",
+    "public": ".",
+    "ignore": ["firebase.json", ".firebaserc", ".DS_Store", ".git", ".claude"]
+  }
+}
