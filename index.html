@@ -253,6 +253,7 @@ textarea,input,select{font-family:inherit;font-size:inherit;}
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
@@ -505,6 +506,7 @@ const firebaseConfig = {
   appId: "1:1036699202830:web:7882891cb0c22edb65d35f"
 };
 firebase.initializeApp(firebaseConfig);
+firebase.auth().signInAnonymously().catch(e=>console.error("Auth error",e));
 const db = firebase.firestore();
 const COL_CONFIG = 'haichi_config';
 const COL_DAY    = 'haichi_day';
@@ -514,8 +516,8 @@ const COL_KINMU  = 'haichi_kinmu';
 // CONSTANTS
 // ============================================================
 const DEFAULT_TPL={
-  weekday:{am:['1班','2A班','2B班','3班','4班','フィルター掃除'],pm:['す・た','ひ','さ・な','フィルター掃除']},
-  weekend:{am:['す・た','ひ','さ・な','入浴','その他'],pm:['す・た(15:00〜)','(15:30〜)','(16:00〜16:30)','ひ','さ・な','各種業務']}
+  weekday:{am:['1班','2A班','2B班','3班','4班','フィルター掃除'],pm:['医務課','支援課','地域支援課','フィルター掃除']},
+  weekend:{am:['医務課','支援課','地域支援課','入浴','その他'],pm:['医務課(15:00〜)','支援課','地域支援課','各種業務']}
 };
 const LUNCH_ROWS=['食事支援','11:30〜休憩','パンプキン支援'];
 const SHIFT_TYPES=['当直・夜勤','早番','遅番','日勤','1','2A','2B','3','4'];
@@ -708,7 +710,7 @@ function getTemplate(){
   return [
     {time:'AM',rows:[...(base.am||[])]},
     {time:'昼食',rows:LUNCH_ROWS},
-    {time:'14:00',rows:isWe?['す・た','ひ','さ・な','','各種業務']:[...pm]},
+    {time:'14:00',rows:isWe?['医務課','支援課','地域支援課','','各種業務']:[...pm]},
     {time:'15:00',rows:[...pm]},
     {time:'17:00',rows:['食事対応']},
   ];
@@ -895,9 +897,26 @@ function saveDlg(){
 // ============================================================
 function openAutoConfirm(){document.getElementById('autoOverlay').classList.add('show');}
 function closeAutoConfirm(){document.getElementById('autoOverlay').classList.remove('show');}
-function runAutoPlace(){
+async function runAutoPlace(){
   const overwrite=document.getElementById('autoOverwrite').checked;
   closeAutoConfirm();
+  // シフトが未読込の場合は自動で勤務表から読み込む
+  const totalShift=Object.values(dayData.shifts||{}).join('');
+  if(!totalShift.trim()){
+    const [y,m,d]=currentDate.split('-').map(Number);
+    showLoading(true);
+    const data=await loadKinmuAsync(y,m);
+    showLoading(false);
+    if(data.schedule&&Object.keys(data.schedule).length>0){
+      const groups={};SHIFT_TYPES.forEach(st=>{groups[st]=[];});
+      Object.entries(data.schedule).forEach(([name,days])=>{
+        const code=days[d];if(!code) return;
+        const st=mapCode(code);if(st&&groups[st]) groups[st].push(name);
+      });
+      SHIFT_TYPES.forEach(st=>{if(groups[st].length>0) dayData.shifts[st]=groups[st].join('、');});
+      renderShiftGrid();
+    }
+  }
   const tpl=getTemplate();dayData.autoCells=dayData.autoCells||{};
   tpl.forEach((block,bi)=>{
     const bt=BLOCK_TIMES[block.time]||'10:00';
