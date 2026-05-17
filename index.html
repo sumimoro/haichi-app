@@ -506,7 +506,6 @@ const firebaseConfig = {
   appId: "1:1036699202830:web:7882891cb0c22edb65d35f"
 };
 firebase.initializeApp(firebaseConfig);
-firebase.auth().signInAnonymously().catch(e=>console.error("Auth error",e));
 const db = firebase.firestore();
 const COL_CONFIG = 'haichi_config';
 const COL_DAY    = 'haichi_day';
@@ -1177,6 +1176,7 @@ document.addEventListener('keydown',e=>{
 // INIT
 // ============================================================
 window.addEventListener('DOMContentLoaded',async()=>{
+  try { await firebase.auth().signInAnonymously(); } catch(e) { console.error("Auth error",e); }
   showLoading(true);
   await Promise.all([loadConfig(),loadDay(currentDate)]);
   showLoading(false);
